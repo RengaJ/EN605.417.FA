@@ -111,6 +111,6 @@ int main(int argc, char** argv)
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(commands);
 	clReleaseContext(context);
-	sleep(1); // Leopard pty bug workaround.
+	// sleep(1); // Leopard pty bug workaround.
 	return 0;
 }

@@ -6,7 +6,9 @@
 #include <OpenCL/opencl.h>
 #else
 #include <CL/cl.h>
+#include <Windows.h>
 #endif
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -297,6 +299,7 @@ free(clPlatformIDs);
       while (tmp != std::string("stepping"));
 
       cpu_name = tmp_stream.str();
+	  printf("cpu_name = %s\n", cpu_name.c_str());
     }
   }
   while ( (! cpuinfo.eof()) );

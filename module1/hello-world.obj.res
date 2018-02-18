@@ -1,0 +1,1 @@
+-D__CUDA_ARCH__=300 -nologo -c -TP  -DCUDA_DOUBLE_MATH_FUNCTIONS "-IC:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin/../include"   -EHsc "hello-world.cudafe1.cpp" 

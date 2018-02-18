@@ -1,0 +1,79 @@
+typedef char __nv_bool;
+#line 461 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\corecrt.h"
+struct __crt_locale_pointers;
+#line 1563 "c:\\program files\\nvidia gpu computing toolkit\\cuda\\v9.1\\include\\driver_types.h"
+struct CUstream_st;
+#line 25 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\corecrt_wstdio.h"
+struct _iobuf;
+#line 194 "E:/Visual Studio 2015/VC/bin/../../VC/INCLUDE\\vcruntime.h"
+typedef unsigned long long size_t;
+#include "crt/device_runtime.h"
+#line 39 "E:/Visual Studio 2015/VC/bin/../../VC/INCLUDE\\vadefs.h"
+typedef char *va_list;
+#line 467 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\corecrt.h"
+typedef struct __crt_locale_pointers *_locale_t;
+#line 28 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\corecrt_wstdio.h"
+typedef struct _iobuf FILE;
+#if !defined(__CUDABE__)
+#line 944 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\stdio.h"
+ __device_builtin__ ___device__(extern  __no_sc__) int printf(const char *const, ...);
+#endif
+#if !defined(__CUDABE__)
+#line 220 "c:\\program files\\nvidia gpu computing toolkit\\cuda\\v9.1\\include\\crt\\math_functions.h"
+ __device_builtin__ ___device__(extern  __no_sc__) double fabs(double);
+#endif
+#if !defined(__CUDABE__)
+#line 1825 "c:\\program files\\nvidia gpu computing toolkit\\cuda\\v9.1\\include\\crt\\math_functions.h"
+ __device_builtin__ ___device__(extern  __no_sc__) double ldexp(double, int);
+#endif
+#if !defined(__CUDABE__)
+#line 2430 "c:\\program files\\nvidia gpu computing toolkit\\cuda\\v9.1\\include\\crt\\math_functions.h"
+ __device_builtin__ ___device__(extern  __no_sc__) double frexp(double, int *);
+#endif
+#if !defined(__CUDABE__)
+#line 656 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\math.h"
+ __device_builtin__ ___device__(extern  __no_sc__) float fabsf(float);
+#endif
+#if !defined(__CUDABE__)
+#line 682 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\math.h"
+ __device_builtin__ ___device__(extern  __no_sc__) float frexpf(float, int *);
+#endif
+#if !defined(__CUDABE__)
+#line 687 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\math.h"
+ __device_builtin__ ___device__(extern  __no_sc__) float hypotf(float, float);
+#endif
+#if !defined(__CUDABE__)
+#line 692 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt\\math.h"
+ __device_builtin__ ___device__(extern  __no_sc__) float ldexpf(float, int);
+#endif
+#line 13 "hello-world.cu"
+__global__ __var_used__ extern void _Z5helloPcPi(char *, int *);
+#include "common_functions.h"
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#if !defined(__CUDABE__)
+#endif
+#line 13 "hello-world.cu"
+__global__ __var_used__ void _Z5helloPcPi(
+#line 13 "hello-world.cu"
+char *a, 
+#line 13 "hello-world.cu"
+int *b){
+#line 14 "hello-world.cu"
+{
+#line 15 "hello-world.cu"
+(a[(threadIdx.x)]) += (b[(threadIdx.x)]); 
+#line 16 "hello-world.cu"
+}}

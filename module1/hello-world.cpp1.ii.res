@@ -1,0 +1,1 @@
+-D__CUDA_ARCH__=300 -nologo -E -TP  -DCUDA_DOUBLE_MATH_FUNCTIONS -D__CUDACC__ -D__NVCC__  "-IC:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin/../include"   -D "__CUDACC_VER_BUILD__=85" -D "__CUDACC_VER_MINOR__=1" -D "__CUDACC_VER_MAJOR__=9" -FI "cuda_runtime.h" -EHsc "hello-world.cu" 

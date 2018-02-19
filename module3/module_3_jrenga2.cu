@@ -61,6 +61,17 @@ int main(int argc, const char* argv[])
     return EXIT_FAILURE;
   }
 
+  // 2.5 Check to see if the minimum number of threads has been achieved (64)
+  if ((numBlocks * numThreads) < 64)
+  {
+    int threadCount = numBlocks * numThreads;
+    printf("ERROR: Minimum number of threads not achieved!\n");
+    printf("----------------------------------------------\n");
+    printf("The total number of threads must be greater than 64. You have provided %d threads.\n", threadCount);
+    printf("\nPlease check your inputs and try again. Thank you! :)\n");
+
+    return EXIT_FAILURE;
+  }
   // 3. Compute necessary array structures
 
   int array_size = numBlocks * numThreads;

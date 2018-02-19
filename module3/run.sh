@@ -1,14 +1,13 @@
 #!/bin/bash
 
 echo "Attempting to compile module_3_jrenga2.exe"
-echo "************************************************************"
-echo "** WARNING: THIS WAS COMPILED ON A WINDOWS MACHINE!       **"
-echo "**          THE COMPILATION MAY FAIL DUE TO LIBRARY PATH  **"
-echo "**          ISSUES. IF THIS HAPPENS, PLEASE MODIFY THIS   **"
-echo "**          COMMAND TO USE THE PROPER PATH!               **"
-echo "************************************************************"
 
-nvcc module_3_jrenga2.cu -L /cygdrive/c/Program\ Files/NVIDIA\ GPU\ Computing\ Toolkit/CUDA/v9.1/lib/x64/ -lcudart -o module_3_jrenga2.exe
+if [ -z "$NVCC_LIBRARY_PATH" ]; then
+  echo "Please set the nvcc library path variable (NVCC_LIBRARY_PATH) for proper compilation."
+  exit 1
+fi
+
+nvcc module_3_jrenga2.cu -L "$NVCC_LIBRARY_PATH" -lcudart -o module_3_jrenga2.exe
 
 echo "Attemping to run module_3_jrenga2.exe"
 echo "-------------------------------------"
@@ -28,5 +27,7 @@ if [ $RETVAL -eq 0 ]; then
   rm stdout.log
 else
   echo "Execution failed! :("
+  cat stdout.log
+  rm stdout.log
   exit 1
 fi

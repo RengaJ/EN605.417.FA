@@ -28,7 +28,7 @@ void main_sub0()
 	cudaMemcpy( cpu_block, gpu_block, ARRAY_SIZE_IN_BYTES, cudaMemcpyHostToDevice );
 	cudaMemcpy( cpu_thread, gpu_thread, ARRAY_SIZE_IN_BYTES, cudaMemcpyHostToDevice );
 
-	const unsigned int num_blocks = ARRAY_SIZE/16;
+	const unsigned int num_blocks = ARRAY_SIZE/32;
 	const unsigned int num_threads = ARRAY_SIZE/num_blocks;
 
 	/* Execute our kernel */

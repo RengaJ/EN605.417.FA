@@ -370,7 +370,6 @@ int main(int argc, char* argv[])
   // Initialize the random numbers
   initializeRandomNumbers();
   
-  printf("GPU ALGORITHMS BEGIN\n");
   // Iterate from 1 -> numBlocks and 1 -> numThreads to perform metrics on numerous configurations
   for (unsigned int blockCount = 1; blockCount <= numBlocks; blockCount = blockCount << 1)
   {

@@ -180,6 +180,9 @@ __host__ void run_gpu_algorithms(int blockCount, int threadCount)
   localModularDivide<<<blockCount, threadCount>>>(deviceInput1, deviceInput2, deviceOutput);
   cudaEventRecord(stopLocalEvent);
   
+  cudaThreadSynchronize();
+  cudaGetLastError();
+  
   // Step 12: Retrieve the output from the local algorithm kernel
   cudaMemcpy(hostOutput, deviceOutput, deviceSize, cudaMemcpyDeviceToHost);
   

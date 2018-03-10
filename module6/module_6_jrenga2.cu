@@ -28,6 +28,9 @@
 #define THREAD_MIN 64
 #define THREAD_MAX 4096
 
+// Declare device constant memory here
+__constant__ static unsigned int ADDITIVE_VALUES[16];
+
 // Declare global host data here:
 unsigned int initializedRNG;
 
@@ -62,6 +65,7 @@ __global__ void localModularDivide(const unsigned int* const input1,
                               const unsigned int* const input2,
                                     unsigned int* const output)
 {
+  // Compute the current thread index
   unsigned int thread_index = (blockIdx.x * blockDim.x) + threadIdx.x;
   
   // Create local registers to store the intermediate data for the algorithm
@@ -73,6 +77,37 @@ __global__ void localModularDivide(const unsigned int* const input1,
   
   // Store the result of the algorithm into the global array
   output[thread_index] = output_local;
+}
+
+__global__ void add_values_shared(unsigned int* deviceData, const unsigned int elementCount)
+{
+  // Declare externally defined shared memory
+  __shared__ unsigned int sharedMemory[THREAD_MAX];
+  
+  // Compute the current thread index
+  unsigned int threadIndex = (blockIdx.x * blockDim.x) + threadIdx.x;
+  
+  // Copy data from the device to the shared memory pool (and perform an operation using constant memory)
+  sharedMemory[threadIndex] = deviceData[threadIndex];
+  
+  // Perform thread synchronization
+  __syncthreads();
+  
+  unsigned int exponentPrimer = threadIndex % 2;
+  
+  for (unsigned int i = 0; i < 16; ++i)
+  {
+    unsigned int currentConstant =  ADDITIVE_VALUES[i];
+    
+    float value = powf(-1, exponentPrimer) * currentConstant;
+    
+    sharedMemory[threadIndex] += value;
+  }
+  
+  __syncthreads();
+  
+  // Copy the data from the shared memory back to the device
+  deviceData[threadIndex] = sharedMemory[elementCount - threadIndex - 1];
 }
 
 // ----------------------------------------- HOST OPERATIONS -----------------------------------------
@@ -111,7 +146,7 @@ __host__ void generateRandomNumbers(      unsigned int* data,
   }
 }
 
-__host__ void run_gpu_algorithms(int blockCount, int threadCount)
+__host__ void run_gpu_algorithm(int blockCount, int threadCount)
 {
   // Step 1: Compute the size of the device array based on the block and thread/per block counts
   unsigned int elementCount = threadCount * blockCount;
@@ -150,13 +185,17 @@ __host__ void run_gpu_algorithms(int blockCount, int threadCount)
   // Step 7: Initialize the CUDA event start/stop timers for benchmarking
   cudaEvent_t stopLocalEvent;
   cudaEvent_t stopGlobalEvent;
+  cudaEvent_t stopSharedEvent;
   cudaEvent_t startLocalEvent;
   cudaEvent_t startGlobalEvent;
+  cudaEvent_t startSharedEvent;
 
   cudaEventCreate(&stopLocalEvent);  
   cudaEventCreate(&stopGlobalEvent);
+  cudaEventCreate(&stopSharedEvent);
   cudaEventCreate(&startLocalEvent);  
   cudaEventCreate(&startGlobalEvent);
+  cudaEventCreate(&startSharedEvent);
   
   // Step 8: Invoke the global algorithm kernel with recording enabled
   cudaEventRecord(startGlobalEvent);
@@ -192,20 +231,47 @@ __host__ void run_gpu_algorithms(int blockCount, int threadCount)
   float localTimeMS = 0.0f;
   cudaEventElapsedTime(&localTimeMS, startLocalEvent, stopLocalEvent);
   
-  // Step 14: Display the results of the two operations
+  // Step 14: Upload the constant memory values to the device:
+  unsigned int* constantMemory = (unsigned int*) malloc(deviceSize);
+  generateRandomNumbers(constantMemory, elementCount, deviceSize);
+  
+  cudaMemcpyToSymbol(ADDITIVE_VALUES, constantMemory, UINT_SIZE * 16);
+  
+  // Step 15: Invoke the shared algorithm kernel with recording enabled
+  cudaEventRecord(startSharedEvent);
+  add_values_shared<<<blockCount, threadCount>>>(deviceOutput, elementCount);
+  cudaEventRecord(stopSharedEvent);
+  
+  cudaThreadSynchronize();
+  cudaGetLastError();
+  
+  // Step 16: Retrieve the output from the global algorithm kernel
+  cudaMemcpy(hostOutput, deviceOutput, deviceSize, cudaMemcpyDeviceToHost);
+  
+  // Step 17: Obtain the ms duration for the global algorithm
+  cudaEventSynchronize(stopSharedEvent);
+  
+  float sharedTimeMS = 0.0f;
+  cudaEventElapsedTime(&sharedTimeMS, startSharedEvent, stopSharedEvent);
+
+  // Step 18: Display the results of the two operations
   printf("Block Count: %d\t Threads Per Block: %d\t", blockCount, threadCount);
   printf("Global Duration: %2f ms\t", globalTimeMS);
+  printf("Shared Duration: %2f ms\t", sharedTimeMS);
   printf("Local  Duration: %2f ms\n", localTimeMS );
   
-  // Step 15: Free device memory:
+  // Step 19: Free device memory:
   cudaFree(deviceInput1);
   cudaFree(deviceInput2);
   cudaFree(deviceOutput);
   
-  // Step 16: Free host memory
+  // Step 20: Free host memory
   free(hostInput1);
   free(hostInput2);
   free(hostOutput);
+  
+  // Step 21: Free constant memory
+  free(constantMemory);
 }
 
 /// @brief determine if the provided number is a power of two
@@ -304,12 +370,13 @@ int main(int argc, char* argv[])
   // Initialize the random numbers
   initializeRandomNumbers();
   
+  printf("GPU ALGORITHMS BEGIN\n");
   // Iterate from 1 -> numBlocks and 1 -> numThreads to perform metrics on numerous configurations
   for (unsigned int blockCount = 1; blockCount <= numBlocks; blockCount = blockCount << 1)
   {
     for (unsigned int threadCount = 1; threadCount <= numThreads; threadCount = threadCount << 1)
     {
-      run_gpu_algorithms(blockCount, threadCount);
+      run_gpu_algorithm(blockCount, threadCount);
     }
   }
   

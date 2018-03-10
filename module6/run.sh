@@ -28,4 +28,4 @@ fi
 
 echo ""
 cat stdout.log
-rm stdout.log
+rm  stdout.log

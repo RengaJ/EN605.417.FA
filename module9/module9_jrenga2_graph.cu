@@ -37,13 +37,19 @@ void populate_topology(std::ifstream& stream, nvgraphCSRTopology32I_t topology)
   metaData >> num_vertices;
   metaData >> num_non_zero;
   
+  // Start filling out the contents of the provided topology
   topology->nvertices           = num_vertices;
   topology->nedges              = num_non_zero;
   topology->source_offsets      = (int*) calloc((num_vertices + 1), sizeof(int));
   topology->destination_offsets = (int*) calloc(num_non_zero, sizeof(int));
-    
+  
+  // Create an index for the destination_offsets array
   int num_zero_counter = 0;
+
+  // Create a number that will contain the current entry
   int data;
+
+
   int sum = 0;
   
   // Read each row of the adjacency matrix and perform the following:
@@ -61,8 +67,7 @@ void populate_topology(std::ifstream& stream, nvgraphCSRTopology32I_t topology)
       adjData >> data;
       if (data != 0)
       {
-        ++topology->
-        destination_offsets[num_zero_counter];
+        ++topology->destination_offsets[num_zero_counter];
         ++sum;
       }
     }
@@ -70,6 +75,33 @@ void populate_topology(std::ifstream& stream, nvgraphCSRTopology32I_t topology)
     topology->source_offsets[i + 1] = sum;
     ++num_zero_counter;
   }
+
+  std::cout << "[DEBUG]  NUM_VERTICES: " << num_vertices << std::endl;
+  std::cout << "[DEBUG]  NUM_NON_ZERO: " << num_non_zero << std::endl;
+  std::cout << "[DEBUG]  topology->source_offsets: {";
+
+  for (int i = 0; i < num_vertices + 1; ++i)
+  {
+    std::cout << topology->source_offsets[i];
+    if (i < num_vertices - 1)
+    {
+      std::cout << ", ";
+    }
+  }
+  std::cout << "}" << std::endl;
+
+
+  std::cout << "[DEBUG]  topology->destination_offets: {";
+  for (int i = 0; i < num_non_zero; ++i)
+  {
+    std::cout << topology->destination_offsets[i];
+    if (i < num_non_zero - 1)
+    {
+      std::cout << ", ";
+    }
+  }
+
+  std::cout << "}" << std::endl;
 }
 
 int main(int argc, char* argv)
@@ -91,18 +123,33 @@ int main(int argc, char* argv)
   }
   
   // Create the image stream
-  std::ifstream imageStream(input_file);
+  std::ifstream graphStream(input_file);
   
-  if (!imageStream.good())
+  if (!graphStream.good())
   {
     std::cout << "File " << input_file << " not found." << std::endl;
     show_program_usage();
+
+    graphStream.close();
     
     return EXIT_FAILURE;
   }
+
+  // Allocate memory for the graph topology
+  // Note that the nvgraphCSRTopology32I_t is a typedef for
+  //   struct nvgraphCSRTopology32I_st*, so the correct type must be provided
+  //   to malloc for proper construction
+  nvgraphCSRTopology32I_t graphTopology =
+    (nvgraphCSRTopology32I_t)malloc(sizeof(struct nvgraphCSRTopology32I_st));
+
+  populate_topology(graphStream, graphTopology);
    
   // Close the stream
-  imageStream.close();
+  graphStream.close();
+
+  free(graphTopology.source_offsets);
+  free(graphTopology.destination_offsets);
+  free(graphTopology);
   
   return EXIT_SUCCESS;
 }

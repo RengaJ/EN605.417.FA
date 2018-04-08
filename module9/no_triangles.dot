@@ -1,0 +1,21 @@
+graph G1
+{
+  {
+    rank = same;
+    A
+    C
+    E
+  }
+
+ {
+   rank = same;
+   B;
+   D;
+   F;
+  }
+  A -- B
+  B -- C
+  B -- D
+  C -- E
+  D -- F
+}

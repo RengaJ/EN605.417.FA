@@ -45,6 +45,11 @@ cl_uint inputSignal[inputSignalWidth][inputSignalHeight] =
 	{5, 9, 8, 1, 8, 1, 1, 1}
 };
 
+// Define the input signal to be a 49x49 array:
+const unsigned int inputSignalDimension = 49;
+
+cl_uint inputSignal2[inputSignalDimension][inputSignalDimension];
+
 const unsigned int outputSignalWidth  = 6;
 const unsigned int outputSignalHeight = 6;
 

@@ -14,8 +14,8 @@
 
 __kernel void convolve(
 	const __global  uint * const input,
-    __constant uint * const mask,
-    __global  uint * const output,
+    __constant float * const mask,
+    __global  float * const output,
     const int inputWidth,
     const int maskWidth)
 {
@@ -29,7 +29,7 @@ __kernel void convolve(
 
         for (int c = 0; c < maskWidth; c++)
         {
-			sum += mask[(r * maskWidth)  + c] * input[idxIntmp + c];
+			     sum += mask[(r * maskWidth)  + c] * input[idxIntmp + c];
         }
     } 
     

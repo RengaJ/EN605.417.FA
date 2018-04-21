@@ -31,22 +31,7 @@
 #define CL_CALLBACK
 #endif
 
-// Constants
-/*const unsigned int inputSignalWidth  = 8;
-const unsigned int inputSignalHeight = 8;
-
-cl_uint inputSignal[inputSignalWidth][inputSignalHeight] =
-{
-	{3, 1, 1, 4, 8, 2, 1, 3},
-	{4, 2, 1, 1, 2, 1, 2, 3},
-	{4, 4, 4, 4, 3, 2, 2, 2},
-	{9, 8, 3, 8, 9, 0, 0, 0},
-	{9, 3, 3, 9, 0, 0, 0, 0},
-	{0, 9, 0, 8, 0, 0, 0, 0},
-	{3, 0, 8, 8, 9, 4, 4, 4},
-	{5, 9, 8, 1, 8, 1, 1, 1}
-};
-*/
+#define MAX_ITERATIONS 2
 
 // Define the input signal to be a 49x49 array:
 const unsigned int inputSignalWidth  = 49;
@@ -57,14 +42,6 @@ const unsigned int outputSignalWidth  = 7;
 const unsigned int outputSignalHeight = 7;
 
 cl_float outputSignal[outputSignalWidth][outputSignalHeight];
-/*
-const unsigned int maskWidth  = 3;
-const unsigned int maskHeight = 3;
-
-cl_uint mask2[maskWidth][maskHeight] =
-{
-	{1, 1, 1}, {1, 0, 1}, {1, 1, 1},
-}; */
 
 // Define the mask to be a 7x7 array:
 const unsigned int maskWidth  = 7;
@@ -276,23 +253,22 @@ void run_kernel()
                                outputSignalBuffer,
                                CL_TRUE,
                                0,
-                               sizeof(cl_float) * outputSignalHeight * outputSignalHeight,
+                               sizeof(cl_float) * outputSignalHeight * outputSignalWidth,
                                outputSignal,
                                0,
                                NULL,
                                NULL);
 	checkErr(errNum, "clEnqueueReadBuffer");
-
-  // Output the result buffer
-  for (int y = 0; y < outputSignalHeight; y++)
-	{
-		for (int x = 0; x < outputSignalWidth; x++)
-		{
-			std::cout << outputSignal[x][y] << " ";
-		}
-		std::cout << std::endl;
-	}
   
+  for (unsigned int i = 0; i < outputSignalHeight; ++i)
+  {
+    for (unsigned int j = 0; j < outputSignalWidth; ++j)
+    {
+      std::cout << outputSignal[i][j] << " ";
+    }
+    std::cout << std::endl;
+  }
+
   cl_ulong times[2];
   
   clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &times[0], NULL);
@@ -310,7 +286,7 @@ int main(int argc, char** argv)
   // Seed the random number generator with the current time
   srand(time(NULL));
   
-  for (unsigned int i = 0; i < 10; ++i)
+  for (unsigned int i = 0; i < MAX_ITERATIONS; ++i)
   {
     run_kernel();
   }

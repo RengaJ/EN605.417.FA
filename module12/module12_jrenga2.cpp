@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     std::vector<cl_kernel> kernels;
     std::vector<cl_command_queue> queues;
     std::vector<cl_mem> buffers;
-    int * inputOutput;
+    float * inputOutput;
 
     int platform = DEFAULT_PLATFORM; 
     bool useMap  = DEFAULT_USE_MAP;
@@ -184,17 +184,17 @@ int main(int argc, char** argv)
     }
 
     // create buffers and sub-buffers
-    inputOutput = new int[NUM_BUFFER_ELEMENTS];
+    inputOutput = new float[NUM_BUFFER_ELEMENTS];
     for (unsigned int i = 0; i < NUM_BUFFER_ELEMENTS; i++)
     {
-        inputOutput[i] = i;
+        inputOutput[i] = (float)i;
     }
 
     // create a single buffer to cover all the input data
     cl_mem buffer = clCreateBuffer(
         context,
         CL_MEM_READ_WRITE,
-        sizeof(int) * NUM_BUFFER_ELEMENTS,
+        sizeof(float) * NUM_BUFFER_ELEMENTS,
         NULL,
         &errNum);
     checkErr(errNum, "clCreateBuffer");
@@ -206,12 +206,9 @@ int main(int argc, char** argv)
     {
         cl_buffer_region region = 
             {
-                SUB_BUFFER_ELEMENTS * i * sizeof(int),
-                SUB_BUFFER_ELEMENTS * sizeof(int)
+                SUB_BUFFER_ELEMENTS * i * sizeof(float),
+                SUB_BUFFER_ELEMENTS * sizeof(float)
             };
-            
-        std::cout << region.origin << std::endl;
-        std::cout << NUM_BUFFER_ELEMENTS * sizeof(int) << std::endl;
 
         buffer = clCreateSubBuffer(
             buffers[0],
@@ -256,13 +253,13 @@ int main(int argc, char** argv)
 
     if (useMap) 
     {
-        cl_int * mapPtr = (cl_int*) clEnqueueMapBuffer(
+        cl_float * mapPtr = (cl_float*) clEnqueueMapBuffer(
             queues[0],
             buffers[0],
             CL_TRUE,
             CL_MAP_WRITE,
             0,
-            sizeof(cl_int) * NUM_BUFFER_ELEMENTS,
+            sizeof(cl_float) * NUM_BUFFER_ELEMENTS,
             0,
             NULL,
             NULL,
@@ -291,7 +288,7 @@ int main(int argc, char** argv)
             buffers[0],
             CL_TRUE,
             0,
-            sizeof(int) * NUM_BUFFER_ELEMENTS,
+            sizeof(float) * NUM_BUFFER_ELEMENTS,
             (void*)inputOutput,
             0,
             NULL,
@@ -326,13 +323,13 @@ int main(int argc, char** argv)
 
     if (useMap)
     {
-        cl_int * mapPtr = (cl_int*) clEnqueueMapBuffer(
+        cl_float * mapPtr = (cl_float*) clEnqueueMapBuffer(
             queues[0],
             buffers[0],
             CL_TRUE,
             CL_MAP_READ,
             0,
-            sizeof(cl_int) * NUM_BUFFER_ELEMENTS,
+            sizeof(cl_float) * NUM_BUFFER_ELEMENTS,
             0,
             NULL,
             NULL,
@@ -362,7 +359,7 @@ int main(int argc, char** argv)
             buffers[0],
             CL_TRUE,
             0,
-            sizeof(int) * NUM_BUFFER_ELEMENTS,
+            sizeof(float) * NUM_BUFFER_ELEMENTS,
             (void*)inputOutput,
             0,
             NULL,

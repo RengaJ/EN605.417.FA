@@ -210,15 +210,22 @@ void getBuffer(cl_mem& buffer, cl_context& context, size_t inputSize)
   CheckError(error, "clCreateBuffer");
 }
 
+/// @brief Enqueue a non-blocking write-to-buffer operation
+///
+/// @param [in]    inputData     The data to write to the buffer
+/// @param [in]    commandQueue  The queue into which the command should be inserted
+/// @param [in]    buffer        The buffer to write into
+/// @param [inout] event         The event associated with the writing operation
 void writeToBuffer(std::vector<int>& inputData,
                    cl_command_queue& commandQueue,
                    cl_mem& buffer,
                    cl_event& event)
 {
+  std::cout << "READ BUFFER" << std::endl;
   cl_int error;
   error = clEnqueueWriteBuffer(commandQueue,
                                buffer,
-                               CL_FALSE,                       /* ENSURE NON-BLOCKING */
+                               CL_TRUE,
                                0,
                                sizeof(int) * inputData.size(),
                                (void*)&inputData[0],
@@ -227,6 +234,59 @@ void writeToBuffer(std::vector<int>& inputData,
                                &event);
   CheckError(error, "clEnqueueWriteBuffer");
 }
+
+/// @brief Print the start, stop and durations of each event in a given list
+///
+/// @param [in] events   The list of events to display
+/// @param [in] header   A descriptor for the display
+void printEventTimes(std::vector<cl_event>& events, std::string header)
+{
+  cl_ulong startTime;
+  cl_ulong endTime;
+  cl_int error;
+  float durationMS;
+  std::cout << "TIMES FOR " << header << ":" << std::endl;
+  for (size_t i = 0; i < events.size(); ++i)
+  {
+    error = clGetEventProfilingInfo(events[i],
+                                    CL_PROFILING_COMMAND_START,
+                                    sizeof(cl_ulong),
+                                    &startTime,
+                                    NULL);
+                                    
+    CheckError(error, "clGetEventProfilingInfo -- START");
+    
+    error = clGetEventProfilingInfo(events[i],
+                                    CL_PROFILING_COMMAND_END,
+                                    sizeof(cl_ulong),
+                                    &endTime,
+                                    NULL);
+                                    
+    CheckError(error, "clGetEventProfilingInfo -- END");
+    
+    durationMS  = (endTime - startTime) * 1.0e-6f;
+    
+    std::cout << "EVENT "     << i           << "::";
+    std::cout << "START: "    << startTime   << "\t";
+    std::cout << "END: "      << endTime     << "\t";
+    std::cout << "DURATION: " << durationMS  << " ms\n";
+  }
+}
+
+void readAndPrintResults(cl_command_queue& queue, cl_mem& buffer, size_t size, std::string label)
+{
+  std::vector<int> data;
+  data.resize(size);
+  clEnqueueReadBuffer(queue, buffer, CL_TRUE, 0, sizeof(int) * size, (void*)&data[0], 0, NULL, NULL);
+  
+  std::cout << "Data resulting from " << label << ":" << std::endl;
+  for (size_t i = 0; i < size; ++i)
+  {
+    std::cout << data[i] << " ";
+  }
+  std::cout << std::endl;
+}
+
 /// @brief The main entry point into the program
 ///
 /// @param [in] argc   The number of arguments to the program (including the program name)
@@ -316,19 +376,57 @@ int main(int argc, char* argv[])
     eventList.push_back(event);
   }
   
-  std::cout << "BUFFER WRITES ENQUEUED" << std::endl;
-  
   // [ENQUEUE EVENT WAIT LIST BARRIER]
   clWaitForEvents(eventList.size(), &eventList[0]);
   
-  std::cout << "BUFFER WRITES COMPLETED" << std::endl;
+  eventList.clear();
   
-  // 2. ENQUEUE KERNELS (ADD ALL EVENTS TO AN EVENT LIST)
-  // 3. READ FROM BUFFER (ADD ALL EVENTS TO AN EVENT LIST)
+  // Execute kernels
+  cl_int error;
+  size_t globalWorkerSize = inputData.size();
+  int previousQueueIndex;
+  for (int i = 0; i < KERNEL_COUNT; ++i)
+  {
+    std::cout << "EXECUTE KERNEL" << std::endl;
+    int queueIndex = (parsedInputs.multipleQueues ? i : 0);
+    
+    if (i != 0)
+    {
+      clEnqueueBarrier(commandQueues[previousQueueIndex]);
+      clEnqueueWaitForEvents(commandQueues[previousQueueIndex], 1, &eventList[i-1]);
+    }
+    
+    cl_event event;
+    error = clEnqueueNDRangeKernel(commandQueues[queueIndex],
+                                   kernels[i],
+                                   1,
+                                   NULL,
+                                   (const size_t*)&globalWorkerSize,
+                                   NULL,
+                                   0,
+                                   NULL,
+                                   &event);
+                                   
+    CheckError(error, "clEnqueueNDRangeKernel");
+    
+    eventList.push_back(event);
+    
+    CheckError(clEnqueueMarker(commandQueues[queueIndex], &eventList[i]), "clEnqueueMarker");
+    previousQueueIndex = queueIndex;
+  }
   
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  //
-  ///////////////////////////////////////////////////////////////////////////////////////////
+  if (parsedInputs.enableTimings)
+  {
+    // printEventTimes(eventList, "KERNEL EXECUTION");
+  }
+  
+  // Finally read (and print) the results
+  for (int i = 0; i < KERNEL_COUNT; ++i)
+  {
+    int queueIndex = (parsedInputs.multipleQueues ? i : 0);
+    
+    readAndPrintResults(commandQueues[queueIndex], buffers[i], inputData.size(), kernelFunctions[i]);
+  }
   
   return 0;
 }

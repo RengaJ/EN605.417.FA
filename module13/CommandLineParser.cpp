@@ -41,17 +41,16 @@ InputData CommandLineParser::ParseInput(int argc, char* argv[])
   // InputData structure
   parsedInputs.inputFile = inputFilename;
 
-  // Check the kernel flag
+  // Check the queue flag
   std::string kernelFlag = argv[2];
 
-  if (kernelFlag == "--cubic")        { parsedInputs.kernel = "cubic";   }
-  else if (kernelFlag == "--quartic") { parsedInputs.kernel = "quartic"; }
-  else if (kernelFlag == "--double")  { parsedInputs.kernel = "double";  }
+  if      (kernelFlag == "--single"  ) { parsedInputs.multipleQueues = false; }
+  else if (kernelFlag == "--multiple") { parsedInputs.multipleQueues = true;  }
   else
   {
     // If an invalid flag is found, return the 
     // current state of the parsed inputs
-    std::cout << "<< ERROR >> INVALID ALGORITHM DETECTED" << std::endl;
+    std::cout << "<< ERROR >> INVALID QUEUE TYPE DETECTED" << std::endl;
 
     return parsedInputs;
   }
@@ -87,15 +86,12 @@ void CommandLineParser::ShowProgramUsage()
   std::cout << "----------------------------------------------------------------------------------" << std::endl;
   std::cout << " EXPECTED PROGRAM USAGE"                                                            << std::endl;
   std::cout << ""                                                                                   << std::endl;
-  std::cout << "module13_jrenga2.exe <INPUT FILE> <KERNEL FILE> [TIMINGS]"                          << std::endl;
+  std::cout << "module13_jrenga2.exe <INPUT FILE> <QUEUE TYPE> [TIMINGS]"                           << std::endl;
   std::cout << ""                                                                                   << std::endl;
   std::cout << "<INPUT FILE>  -- REQUIRED -- Indicates the name of the input file. Must have an   " << std::endl;
   std::cout << "                             extension of '.dat'"                                   << std::endl;
-  std::cout << "<KERNEL FILE> -- REQUIRED -- Indicates what kernel should be used for execution.  " << std::endl;
-  std::cout << "                             Can be one of the following:"                          << std::endl;
-  std::cout << "                                --cubic   : Cube the input"                         << std::endl;
-  std::cout << "                                --quartic : Raise the input the fourth power"       << std::endl;
-  std::cout << "                                --double  : Double the input"                       << std::endl;
+  std::cout << "<QUEUE TYPE>  -- REQUIRED -- Indicates if a single queue or multiple queues should" << std::endl;
+  std::cout << "                             be used. Enable with --single or --multiple"           << std::endl;
   std::cout << "[TIMINGS]     -- OPTIONAL -- Indicates if timings should be recorded and displayed" << std::endl;
   std::cout << "                             Enable with the '--enable-timing' value. "             << std::endl;
   std::cout << "----------------------------------------------------------------------------------" << std::endl;

@@ -33,3 +33,15 @@ void Filereader::readFile(std::string& data)
   data = std::string(std::istreambuf_iterator<char>(_stream),
                     (std::istreambuf_iterator<char>()));
 }
+
+void Filereader::readFile(std::vector<int>& input)
+{
+  input.clear();
+  
+  int value;
+  while (_stream.good())
+  {
+    _stream >> value;
+    input.push_back(value);
+  }
+}

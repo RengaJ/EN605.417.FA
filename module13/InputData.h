@@ -8,14 +8,14 @@ struct InputData
 	/// @brief Constructor for the InputData structure
 	InputData()
 	{
-		inputFile     = "__INVALID__";
-    kernel        = "<< INALID >>";
-    enableTimings = false;
-		valid         = false;
+		inputFile      = "__INVALID__";
+    multipleQueues = false;
+    enableTimings  = false;
+		valid          = false;
 	}
 
 	std::string inputFile;  // The name of the input file
-	std::string kernel;     // What is the kernel name
+  bool multipleQueues;    // Enable multiple queue processing
   bool enableTimings;     // Enable timing operations
 	bool valid;             // Was the input successfully parsed?
 };

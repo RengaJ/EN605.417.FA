@@ -14,5 +14,5 @@ fi
 
 nvcc -I "$CUDA_INCLUDE_PATH" -L "$NVCC_LIBRARY_PATH" -lOpenCL CommandLineParser.cpp Filereader.cpp module13_jrenga2.cpp -o module13_jrenga2.exe
 
-./module13_jrenga2.exe input.dat --cubic --enable-timing
+./module13_jrenga2.exe input.dat --multiple --enable-timing
 

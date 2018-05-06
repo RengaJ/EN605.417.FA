@@ -248,6 +248,7 @@ void printEventTimes(std::vector<cl_event>& events, std::string header)
   std::cout << "TIMES FOR " << header << ":" << std::endl;
   for (size_t i = 0; i < events.size(); ++i)
   {
+    clWaitForEvents(1, &events[i]);
     error = clGetEventProfilingInfo(events[i],
                                     CL_PROFILING_COMMAND_START,
                                     sizeof(cl_ulong),
@@ -376,9 +377,10 @@ int main(int argc, char* argv[])
     eventList.push_back(event);
   }
   
-  // [ENQUEUE EVENT WAIT LIST BARRIER]
-  clWaitForEvents(eventList.size(), &eventList[0]);
-  
+  if (parsedInputs.enableTimings)
+  {
+    printEventTimes(eventList, "WRITING");
+  }
   eventList.clear();
   
   // Execute kernels
@@ -417,7 +419,7 @@ int main(int argc, char* argv[])
   
   if (parsedInputs.enableTimings)
   {
-    // printEventTimes(eventList, "KERNEL EXECUTION");
+    printEventTimes(eventList, "KERNEL EXECUTION");
   }
   
   // Finally read (and print) the results
